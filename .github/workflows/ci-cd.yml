@@ -2,9 +2,9 @@ name: CI/CD Pipeline - Build, Push, and Deploy
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   pull_request:
-    branches: [main]
+    branches: [dev]
 
 jobs:
   build-and-push:
@@ -32,11 +32,11 @@ jobs:
         with:
           context: app/src
           file: app/src/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/dev' }}
           tags: ${{ secrets.DOCKER_USERNAME }}/weather-app:${{ env.SHORT_SHA }}
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/dev'
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
@@ -53,13 +53,9 @@ jobs:
           envs: SHORT_SHA
           script: |
             set -euo pipefail
-            cd /var/services/weather/app
-            if grep -q '^IMAGE_TAG=' .env; then
-              sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${SHORT_SHA}/" .env
-            else
-              echo "IMAGE_TAG=${SHORT_SHA}" >> .env
-            fi
+            cd /opt/services/app
+            sed -i "s|weather-app:[^ ]*|weather-app:${SHORT_SHA}|" compose.yml
             docker compose -f compose.yml pull
-            docker compose -f compose.yml up -d --remove-orphans 
+            docker compose -f compose.yml up -d --remove-orphans
             docker image prune -f
 
