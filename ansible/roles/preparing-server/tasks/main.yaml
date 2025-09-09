@@ -1,0 +1,16 @@
+---
+- name: set the .bashrc for root user
+  import_tasks: bashrc.yml
+  tags: bashrc
+
+- name: install package
+  import_tasks: packages.yaml
+  tags: install_packages
+
+- name: change resolved.conf
+  import_tasks: resolvedconf.yml
+  tags: hardening
+
+- name: ssh banner
+  import_tasks: ssh-banner.yaml
+  tags: tuning

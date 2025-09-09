@@ -1,0 +1,30 @@
+# basic package list for installation
+packages:
+- rsync
+- wget
+- git
+- vim
+- curl
+- htop
+- iftop
+- jq
+- ncdu
+- unzip
+- net-tools
+- dnsutils
+- atop
+- sudo
+- ntp
+- apache2-utils
+- tcpdump
+- telnet
+- axel
+- iptables-persistent
+- ntp
+
+# dns variables
+dns: 8.8.8.8 1.1.1.1
+fallback_dns: 9.9.9.9 4.2.2.4
+dnssec: allow-downgrade
+dns_over_tls: opportunistic
+

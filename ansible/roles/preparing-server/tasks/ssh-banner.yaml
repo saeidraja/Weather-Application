@@ -1,0 +1,10 @@
+- name: see the server details when ssh
+  become: 'yes'
+  copy:
+    src: 10-ssh-banner
+    dest: /etc/update-motd.d
+    backup: 'yes'
+    mode: 0755
+    owner: root
+    group: root
+

@@ -1,0 +1,10 @@
+all:
+  children:
+    dotin-servers:
+      children:
+        managers:
+          hosts:
+            app1:
+              ansible_host: 37.32.5.2
+              ansible_user: root
+              ansible_port: 8090
