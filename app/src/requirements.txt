@@ -1,0 +1,5 @@
+requests==2.32.3
+influxdb-client==1.45.0  # For InfluxDB v2
+python-json-logger==2.0.7
+streamlit==1.38.0
+python-dotenv==1.0.1
