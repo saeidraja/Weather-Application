@@ -1,0 +1,4 @@
+---
+- name: config and setup all service
+  import_tasks: app-setup.yaml
+
