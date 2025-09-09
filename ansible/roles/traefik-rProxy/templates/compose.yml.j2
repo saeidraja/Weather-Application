@@ -1,0 +1,66 @@
+version: "3.9"
+
+networks:
+  web_net:
+    external: true
+
+volumes:
+  traefik-acme:
+    name: traefik-acme
+
+services:
+  traefik:
+    image: "{{TRAEFIK_IMAGE }}:{{TRAEFIK_VERSION}}"
+    restart: always
+    container_name: traefik
+    command:
+      - --log.level=DEBUG
+      - --log.filepath=/log-file.log
+      - --log.format=json
+      - --api=true
+      - --ping=true
+      - --accesslog=true
+      - --accesslog.fields.names.StartUTC=drop
+      - --accesslog.bufferingsize=250
+      - --api.insecure=false
+      - --providers.docker
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.mycert.acme.email=raja.saeid@gmail.com
+      - --certificatesresolvers.mycert.acme.storage=/acme/acme.json
+      - --certificatesresolvers.mycert.acme.tlschallenge=true
+      - --providers.file.filename=/traefik/config.yml
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/acme
+      - ./traefik-config.yml:/traefik/config.yml  # Mounting the config file directly
+    environment:
+      - TZ=Asia/Tehran
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:8080/ping || exit 1
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=web_net
+      - traefik.http.middlewares.web-auth.basicauth.users=hamcup:$$2y$$05$$YRNTLQzWTMk50oXJY7QBSOGfTjWqAKalF7IL2hWqnlEDMWDhB95v6
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+      - traefik.http.routers.traefik-http.rule=Host(`traefik.jezire.ir`)
+      - traefik.http.routers.traefik-http.entrypoints=http
+      - traefik.http.routers.traefik-http.middlewares=https-redirect
+      - traefik.http.routers.traefik-https.rule=Host(`traefik.jezire.ir`)
+      - traefik.http.routers.traefik-https.entrypoints=https
+      - traefik.http.routers.traefik-https.tls=true
+      - traefik.http.routers.traefik-https.service=api@internal
+      - traefik.http.routers.traefik-https.tls.certresolver=mycert
+      - traefik.http.routers.traefik-https.middlewares=web-auth
+      - traefik.http.services.metrics.loadbalancer.server.port=8082
+    networks:
+      - web_net

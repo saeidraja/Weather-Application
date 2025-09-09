@@ -1,0 +1,8 @@
+---
+# project directory
+TRAEFIK_DIRE_NAME: /opt/services/traefik
+
+# nexus3, gitlab, and traefik docker image address and version
+TRAEFIK_IMAGE: traefik
+TRAEFIK_VERSION: v3.5.1
+#TRAEFIK_VERSION: v3.0
