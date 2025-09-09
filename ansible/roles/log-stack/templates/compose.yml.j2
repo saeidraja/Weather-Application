@@ -1,0 +1,86 @@
+version: '3.9'
+
+networks:
+  app_net:
+    external: true
+    name: app_net
+  web_net:
+    external: true
+    name: web_net
+
+volumes:
+  grafana_data:
+    name: grafana_data
+  loki_data:
+    name: loki_data
+
+services:
+  loki-grafana:
+    image: "{{GRAFANA_IMAGE }}:{{GRAFANA_VERSION}}"
+    restart: {{RESTART_POLICY}}
+    container_name: loki-grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/:/etc/grafana/provisioning/
+    environment:
+      GF_SECURITY_ADMIN_USER: "{{ GRAFANA_USERNAME}}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{GRAFANA_PASSWORD}}"
+      GF_SMTP_ENABLED: "true"
+      GF_INSTALL_PLUGINS: "{{GRAFANA_INSTALL_PLUGINS}}"
+      GF_PATHS_PROVISIONING: "/etc/grafana/provisioning"
+      GF_PATHS_DATA: "/var/lib/grafana"
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.loki-grafana.rule=Host(`{{LOGRASUB}}.{{DOMAIN_ADDRESS}}`)"
+      - "traefik.http.routers.loki-grafana.entrypoints=http"
+      - "traefik.http.routers.loki-grafana.middlewares=https-redirect"
+      - "traefik.http.routers.loki-grafana-secure.rule=Host(`{{LOGRASUB}}.{{DOMAIN_ADDRESS}}`)"
+      - "traefik.http.routers.loki-grafana-secure.entrypoints=https"
+      - "traefik.http.routers.loki-grafana-secure.tls=true"
+      - "traefik.http.routers.loki-grafana-secure.service=loki-grafana"
+      - "traefik.http.routers.loki-grafana-secure.tls.certresolver=mycert"
+      - "traefik.http.services.loki-grafana.loadbalancer.server.port=3000"
+
+  loki:
+    image: "{{LOKI_IMAGE }}:{{LOKI_VERSION}}"
+    command: -config.file=/etc/loki/loki.yml
+    restart: {{RESTART_POLICY}}
+    container_name: loki
+    user: root
+    volumes:
+      - loki_data:/tmp/loki
+      - ./loki:/etc/loki/
+    networks:
+      - web_net
+      - app_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.loki.rule=Host(`{{LOGSUB}}.{{DOMAIN_ADDRESS}})"
+      - "traefik.http.routers.loki.entrypoints=http"
+      - "traefik.http.routers.loki.middlewares=https-redirect"
+      - "traefik.http.routers.loki-secure.rule=Host(`{{LOGSUB}}.{{DOMAIN_ADDRESS}}`)"
+      - "traefik.http.routers.loki-secure.entrypoints=https"
+      - "traefik.http.routers.loki-secure.tls=true"
+      - "traefik.http.routers.loki-secure.service=loki"
+      - "traefik.http.routers.loki-secure.tls.certresolver=mycert"
+      - "traefik.http.services.loki.loadbalancer.server.port=3100"
+
+  promtail:
+    image: "{{PROMTAIL_IMAGE }}:{{PROMTAIL_VERSION}}"
+    restart: {{RESTART_POLICY}}
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail:/etc/promtail/
+    command: -config.file=/etc/promtail/promtail.yml
+    networks:
+      - app_net

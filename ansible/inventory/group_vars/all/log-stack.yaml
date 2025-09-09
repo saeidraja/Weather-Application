@@ -1,0 +1,27 @@
+---
+# project directory
+LOG_DIRE_NAME: /opt/services/logging
+
+#GRAFANA_IMAGE: grafana/grafana
+GRAFANA_IMAGE: grafana/grafana-oss
+GRAFANA_VERSION: 12.1.1
+LOKI_IMAGE: grafana/loki
+LOKI_VERSION: 3.5.4
+PROMTAIL_IMAGE: grafana/promtail
+PROMTAIL_VERSION: 3.5.4
+
+# Domain and subdomain definition
+DOMAIN_ADDRESS: jezire.ir
+LOGRASUB: grafana
+LOGSUB: loki
+
+# Grafana Auth
+GRAFANA_USERNAME: dotinUser
+GRAFANA_PASSWORD: {{secrets}}
+GRAFANA_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource,grafana-piechart-panel
+
+# set restart policy
+RESTART_POLICY: unless-stopped
+# pass generate with this commands
+# htpasswd -nbs user pass
+
