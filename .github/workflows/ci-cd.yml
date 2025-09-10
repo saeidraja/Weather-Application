@@ -2,9 +2,9 @@ name: CI/CD Pipeline - Build, Push, and Deploy
 
 on:
   push:
-    branches: [dev]
+    branches: [main]
   pull_request:
-    branches: [dev]
+    branches: [main]
 
 jobs:
   build-and-push:
@@ -32,11 +32,11 @@ jobs:
         with:
           context: app/src
           file: app/src/Dockerfile
-          push: ${{ github.ref == 'refs/heads/dev' }}
+          push: ${{ github.ref == 'refs/heads/main' }}
           tags: ${{ secrets.DOCKER_USERNAME }}/weather-app:${{ env.SHORT_SHA }}
 
   deploy:
-    if: github.ref == 'refs/heads/dev'
+    if: github.ref == 'refs/heads/main'
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
