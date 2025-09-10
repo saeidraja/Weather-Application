@@ -44,4 +44,6 @@ Using Ansible playbooks to automate server preparation and deployment of the wea
 - Monitor with Grafana dashboards post-deployment.
 
 ## Future Improvements
-An opportunity exists to integrate a GitHub Actions workflow for sequentially executing these playbooks, enhancing automation and enabling secure storage of sensitive data (e.g., passwords, tokens) in GitHub Secrets, referenced via group vars. Additionally, implementing Ansible Vault or other dedicated secret managers would provide robust handling of secrets. Due to time constraints, these features were not implemented, and unfortunately, they were missed in this iteration. However, they will be added in the near future.
+An opportunity exists to integrate a GitHub Actions workflow for sequentially executing these playbooks, enhancing automation and enabling secure storage of sensitive data (e.g., passwords, tokens) in GitHub Secrets, referenced via group vars. Additionally, implementing Ansible Vault or other dedicated secret managers would provide robust handling of secrets. 
+
+Due to time constraints, these features were not implemented, and unfortunately, they were missed in this iteration. However, they will be added in the near future.
