@@ -1,0 +1,9 @@
+- name: Replace .bashrc with the template
+  become: 'yes'
+  ansible.builtin.template:
+    src: bashrc.j2
+    dest: /root/.bashrc
+    mode: 0644
+    owner: root
+    group: root
+    backup: 'yes'  # Automatically creates a backup before overwriting

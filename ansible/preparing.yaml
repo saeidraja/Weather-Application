@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  gather_facts: yes
+  name: install and configure server
+  roles:
+#    preparing server and hardening
+    - { role: preparing-server, become: True, tags: preparing-server }
+#    install and configure docker service
+    - { role: docker-install, become: True, tags: docker-install }

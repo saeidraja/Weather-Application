@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: true
+  gather_facts: yes
+  name: install and configure log server
+  roles:
+  # install and configure log  server
+    - { role: app , become: True, tags: app-setup }#

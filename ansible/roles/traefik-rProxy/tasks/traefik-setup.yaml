@@ -1,0 +1,37 @@
+---
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ TRAEFIK_DIRE_NAME }}"
+
+- name: copy traefik config
+  template:
+    src: traefik-config.yml.j2
+    dest: "{{ TRAEFIK_DIRE_NAME }}/traefik-config.yml"
+
+- name: copy Docker Compose files
+  template:
+    src: compose.yml.j2
+    dest: "{{ TRAEFIK_DIRE_NAME }}/compose.yml"
+
+- name: Ensure shared Docker networks exist
+  community.docker.docker_network:
+    name: "{{ item }}"
+    state: present
+    driver: bridge
+  loop:
+    - web_net
+    - db_net
+    - app_net
+
+- name: Run docker compose up
+  community.docker.docker_compose_v2:
+    project_src: "{{ TRAEFIK_DIRE_NAME }}"
+    files:
+      - compose.yml
+    pull: always         
+    remove_orphans: true
+    state: present
+

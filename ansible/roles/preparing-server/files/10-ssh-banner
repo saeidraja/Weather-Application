@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "
+============================================
+     Welcome to $(hostname)
+============================================
+
+🖥  Hostname      : $(hostname)
+⏳  Uptime        : $(uptime -p)
+🚀  Load Average  : $(awk '{print $1, $2, $3}' /proc/loadavg)
+🧠  Memory Usage  : $(free -h | awk '/Mem/ {print $3 "/" $2}')
+💾  Disk Usage    : $(df -h / | awk 'NR==2 {print $3 "/" $2}')
+👥  Active Users  : $(who | wc -l)
+🔐  Last Login    : $(last -n 1 -a | head -n 1)
+🌐  IP Address    : $(hostname -I | awk '{print $1}')
+============================================
+"

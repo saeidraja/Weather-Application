@@ -1,0 +1,33 @@
+---
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ APP_DIRE_NAME }}"
+
+
+- name: copy Docker Compose files
+  template:
+    src: compose.yml.j2
+    dest: "{{ APP_DIRE_NAME }}/compose.yml"
+
+- name: Ensure shared Docker networks exist
+  community.docker.docker_network:
+    name: "{{ item }}"
+    state: present
+    driver: bridge
+  loop:
+    - web_net
+    - db_net
+    - app_net
+
+- name: Run docker compose up
+  community.docker.docker_compose_v2:
+    project_src: "{{ APP_DIRE_NAME }}"
+    files:
+      - compose.yml
+    pull: always         
+    remove_orphans: true
+    state: present
+

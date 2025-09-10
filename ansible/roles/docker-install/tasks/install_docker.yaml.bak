@@ -1,0 +1,49 @@
+---
+- name: install dependency
+  apt:
+    name: "{{item}}"
+    state: present
+    update_cache: yes
+  loop:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+
+#- name: Download Docker GPG key
+#  apt_key:
+#    url: https://download.docker.com/linux/{{ os_family }}/gpg
+#    state: present
+#    environment: "{{ proxy_env }}"
+- name: Download Docker GPG key using curl with proxy
+  shell: curl -fsSL https://download.docker.com/linux/{{ os_family }}/gpg -o /tmp/docker.gpg
+  environment: "{{ proxy_env }}"
+
+- name: Add Docker GPG key
+  apt_key:
+    file: /tmp/docker.gpg
+    state: present
+
+- name: add docker repo
+  apt_repository:
+    repo: deb https://download.docker.com/linux/{{ os_family }} {{ ansible_distribution_release }} stable
+    state: present
+  environment: "{{ proxy_env }}"
+
+- name: install docker
+  apt:
+    name: "{{item}}"
+    state: latest
+    update_cache: yes
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+  environment: "{{ proxy_env }}"
+
+- name: start and enable docker
+  service:
+    name: docker
+    state: started
+    enabled: yes

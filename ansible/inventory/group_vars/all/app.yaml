@@ -1,0 +1,25 @@
+APP_DIRE_NAME: /opt/services/app
+
+#app
+DOCKER_REGISTRY: docker.io
+DOCKER_USERNAME: saeidraja
+IMAGE_TAG: 1d7152a
+TZ: Asia/Tehran
+RESTART_POLICY: unless-stopped
+OPENWEATHER_API_KEY: {{secrets}}
+
+INFLUXDB_IMAGE: influxdb
+#INFLUXDB_VERSION: 2.7
+INFLUXDB_VERSION: 2.7.12
+INFLUXDB_URL: http://influxdb:8086  # Or http://localhost:8086 for local testing
+INFLUXDB_ORG: dotin
+INFLUXDB_BUCKET: weather_db
+INFLUXDB_TOKEN: {{secrets}}
+# db
+
+DOCKER_INFLUXDB_INIT_USERNAME: admin
+DOCKER_INFLUXDB_INIT_PASSWORD: {{secrets}}
+DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: {{secrets}}
+DOCKER_INFLUXDB_INIT_ORG: dotin
+DOCKER_INFLUXDB_INIT_BUCKET: weather_db
+DOCKER_INFLUXDB_INIT_RETENTION: 30d

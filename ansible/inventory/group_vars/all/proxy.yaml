@@ -1,0 +1,4 @@
+# setup http proxy configuration
+proxy_env:
+#  http_proxy: http://89.233.107.245:3040
+  https_proxy: http://89.233.107.245:3040

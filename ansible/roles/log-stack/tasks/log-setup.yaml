@@ -1,0 +1,57 @@
+---
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ LOG_DIRE_NAME }}"
+    - "{{ LOG_DIRE_NAME }}/loki"
+    - "{{ LOG_DIRE_NAME }}/grafana"
+    - "{{ LOG_DIRE_NAME }}/grafana/dashboards"
+    - "{{ LOG_DIRE_NAME }}/grafana/datasources"
+    - "{{ LOG_DIRE_NAME }}/promtail"
+
+- name: copy loki config
+  template:
+    src: loki.yml.j2
+    dest: "{{ LOG_DIRE_NAME }}/loki/loki.yml"
+
+- name: copy promtail config
+  template:
+    src: promtail.yml.j2
+    dest: "{{ LOG_DIRE_NAME }}/promtail/promtail.yml"
+
+- name: Copy grafana dashboards
+  template:
+    src: dashboard.yml.j2
+    dest: "{{ LOG_DIRE_NAME }}/grafana/dashboards/dashboard.yml"
+
+- name: Copy grafana datasource
+  template:
+    src: datasource.yml.j2
+    dest: "{{ LOG_DIRE_NAME }}/grafana/datasources/datasource.yml"
+
+- name: copy Docker Compose files
+  template:
+    src: compose.yml.j2
+    dest: "{{ LOG_DIRE_NAME }}/compose.yml"
+
+- name: Ensure shared Docker networks exist
+  community.docker.docker_network:
+    name: "{{ item }}"
+    state: present
+    driver: bridge
+  loop:
+    - web_net
+    - db_net
+    - app_net
+
+- name: Run docker compose up
+  community.docker.docker_compose_v2:
+    project_src: "{{ LOG_DIRE_NAME }}"
+    files:
+      - compose.yml
+    pull: always         
+    remove_orphans: true
+    state: present
+

@@ -1,0 +1,82 @@
+version: '3.9'
+
+networks:
+  web_net:
+    external: true
+    name: web_net
+  db_net:
+    external: true
+    name: db_net
+  app_net:
+    external: true
+    name: app_net
+
+volumes:
+  influxdb-data:
+    name: influxdb-data
+  influxdb-config:
+    name: influxdb-config
+
+services:
+  app:
+    image: {{DOCKER_REGISTRY}}/{{DOCKER_USERNAME}}/weather-app:{{IMAGE_TAG}}
+    restart: {{RESTART_POLICY}}
+    container_name: app
+    depends_on:
+      influxdb:
+        condition: service_healthy
+
+    environment:
+      OPENWEATHER_API_KEY: {{OPENWEATHER_API_KEY}}
+      INFLUXDB_URL: {{INFLUXDB_URL}}
+      INFLUXDB_ORG: {{INFLUXDB_ORG}}
+      INFLUXDB_BUCKET: {{INFLUXDB_BUCKET}}
+      INFLUXDB_TOKEN: {{INFLUXDB_TOKEN}}
+      TZ: {{TZ}}
+    networks:
+      - db_net
+      - web_net
+      - app_net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m" 
+        max-file: "3"   
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web_net"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.weather.rule=Host(`weather.jezire.ir`)"
+      - "traefik.http.routers.weather.entrypoints=http"
+      - "traefik.http.routers.weather.middlewares=https-redirect"
+      - "traefik.http.routers.weather-secure.rule=Host(`weather.jezire.ir`)"
+      - "traefik.http.routers.weather-secure.entrypoints=https"
+      - "traefik.http.routers.weather-secure.tls=true"
+      - "traefik.http.routers.weather-secure.service=weather"
+      - "traefik.http.routers.weather-secure.tls.certresolver=mycert"
+      - "traefik.http.services.weather.loadbalancer.server.port=8501"
+
+  influxdb:
+    image: "{{ INFLUXDB_IMAGE }}:{{ INFLUXDB_VERSION }}"
+    restart: {{RESTART_POLICY}}
+    container_name: influxdb
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: {{DOCKER_INFLUXDB_INIT_USERNAME}}
+      DOCKER_INFLUXDB_INIT_PASSWORD: {{DOCKER_INFLUXDB_INIT_PASSWORD}}
+      DOCKER_INFLUXDB_INIT_ORG: {{DOCKER_INFLUXDB_INIT_ORG}}
+      DOCKER_INFLUXDB_INIT_BUCKET: {{DOCKER_INFLUXDB_INIT_BUCKET}}
+      DOCKER_INFLUXDB_INIT_RETENTION: {{DOCKER_INFLUXDB_INIT_RETENTION}}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: {{DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}}
+      TZ: {{TZ}}
+    networks:
+      - db_net
+    healthcheck:
+      test: ["CMD", "influx", "ping", "--host", "http://localhost:8086"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
