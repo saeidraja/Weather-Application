@@ -12,7 +12,7 @@ except ValueError as e:
 # UI
 st.title("Weather App")
 
-city = st.text_input("Enter city name (e.g., 'Rasht')")
+city = st.text_input("Enter city name (e.g., 'Sabzevar')")
 
 if st.button("Get Weather"):
     if city:
